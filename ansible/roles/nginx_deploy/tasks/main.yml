@@ -1,0 +1,39 @@
+---
+# tasks file for nginx_deploy
+- name: 1. Configure Artifactory as a YUM Repository
+  ansible.builtin.yum_repository:
+    name: pnc_artifactory
+    description: PNC Internal YUM Repo
+    baseurl: "https://pnc.jfrog.io/artifactory/yum-repo-prod"
+    gpgcheck: yes
+    gpgkey: "https://pnc.jfrog.io/artifactory/yum-repo-prod/RPM-GPG-KEY-pnc"
+    enabled: yes
+    state: present
+
+- name: 2. Install Nginx package from Artifactory
+  ansible.builtin.dnf:
+    name: "nginx-{{ nginx_version }}"
+    state: present
+    update_cache: yes
+  notify: Restart Nginx
+
+- name: 3. Deploy Nginx configuration from template
+  ansible.builtin.template:
+    src: nginx.conf.j2
+    dest: /etc/nginx/nginx.conf
+    owner: root
+    group: root
+    mode: '0644'
+  notify: Restart Nginx
+
+- name: 4. Ensure Nginx service is running and enabled on boot
+  ansible.builtin.systemd:
+    name: nginx
+    state: started
+    enabled: yes
+
+handlers:
+  - name: Restart Nginx
+    ansible.builtin.systemd:
+      name: nginx
+      state: restarted

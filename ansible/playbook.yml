@@ -1,0 +1,6 @@
+---
+- name: Deploy and Configure Nginx from Artifactory
+  hosts: webservers
+  become: yes
+  roles:
+    - role: nginx_deploy

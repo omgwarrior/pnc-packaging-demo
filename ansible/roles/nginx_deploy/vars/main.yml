@@ -1,0 +1,4 @@
+---
+# vars file for nginx_deploy
+nginx_version: "1.24.0-1.el8"
+server_name: "app.pnc.com"
